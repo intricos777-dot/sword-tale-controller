@@ -1,78 +1,145 @@
-# Sword Tale: Lost Excalibur — Controller Support
+# Sword Tale: Lost Excalibur — Controller / Gamepad Support
 
-Controller/gamepad support configuration for **Sword Tale: Lost Excalibur** (Steam App ID: 3305630).
+Controller remap for **Sword Tale: Lost Excalibur** (Steam App ID: **3305630**,
+UE 4.18). Works on **Windows, Linux, macOS (Whisky/Crossover), and Steam Deck**
+— any OS or kernel that runs the game, because it does not patch the game: it
+layers **Unreal Engine's native `Input.ini`** on top of the game's built-in
+bindings.
 
-## What this does
+The game's default gamepad scheme is awkward (`RT = Dodge`, `LT = Charge`,
+`RB = Block`, slots unbound). This repo re-forges it into a souls-style layout:
 
-This repo provides controller input bindings so you can play Sword Tale: Lost Excalibur with a gamepad instead of keyboard and mouse.
+## The layout
 
-## Installation
+| Action           | Gamepad (Steam/Xbox labels)        |
+|------------------|------------------------------------|
+| **Attack**       | **RT** — Right Trigger             |
+| **Block / Defend** | **LT** — Left Trigger            |
+| Charge (heavy)   | RB — Right Shoulder                |
+| Dodge            | LB — Left Shoulder                 |
+| Jump             | A                                  |
+| Interact         | B                                  |
+| Inventory        | X                                  |
+| Sprint           | Y                                  |
+| WeaponToggle     | L3 (left stick click)              |
+| SkillTree        | R3 (right stick click; keyboard `K` kept) |
+| Item Slot 1–4    | D-pad Up / Down / Left / Right     |
+| Item Slot 5      | Select / Back                      |
+| Pause / Menu     | Start / Menu                       |
+| Move             | Left stick (unchanged)             |
+| Camera           | Right stick (unchanged)            |
 
-### Steam Input (recommended)
+Keyboard/mouse bindings are untouched.
 
-1. Right-click Sword Tale: Lost Excalibur in your Steam library
-2. Select **Properties** → **Controller** → **General Controller Settings**
-3. Enable your controller type (Xbox, PlayStation, etc.)
-4. Steam Input will automatically provide gamepad support
+---
 
-### Manual configuration
+## Install — Method A: drop-in `Input.ini` (recommended, all OS)
 
-Copy the files from this repo into your Proton prefix:
+The file [`Input.ini`](Input.ini) goes into the game's *Saved* config directory
+(Unreal Engine merges it over the built-in defaults at launch — no mod loader,
+no game files touched).
 
-```bash
-# Find your Proton prefix for this game
-GAMEDIR="$HOME/.local/share/Steam/steamapps/compatdata/3305630"
+### 1. Find your Saved config directory
 
-# Copy the Input.ini
-cp Input.ini "$GAMEDIR/pfx/drive_c/users/steamuser/AppData/Local/SwordTale/Saved/Config/WindowsNoEditor/Input.ini"
-```
+| OS | Path |
+|----|------|
+| **Windows** | `%LOCALAPPDATA%\SwordTale\Saved\Config\WindowsNoEditor\` |
+| **Linux / Steam Deck** (Proton) | `~/.steam/steam/steamapps/compatdata/3305630/pfx/drive_c/users/steamuser/AppData/Local/SwordTale/Saved/Config/WindowsNoEditor/` |
+| **macOS** (Whisky / CrossOver bottle) | inside the bottle: `drive_c/users/<user>/AppData/Local/SwordTale/Saved/Config/WindowsNoEditor/` |
+| **Heroic / Lutris (non-Steam)** | your prefix's `drive_c/users/<user>/AppData/Local/SwordTale/Saved/Config/WindowsNoEditor/` |
 
-### For non-Steam play (lutris, heroic, etc.)
+### 2. Place the file
 
-Use the `Input.ini` from this repo and place it in your game's Saved/Config directory.
+Copy `Input.ini` from this repo into that directory.
 
-## Controls
+- **Linux / Steam Deck (copy-paste):**
 
-| Action | Keyboard | Gamepad |
-|--------|----------|---------|
-| Move Forward | W / Up | Left Stick Up |
-| Move Backward | S / Down | Left Stick Down |
-| Move Left | A / Left | Left Stick Left |
-| Move Right | D / Right | Left Stick Right |
-| Look/Turn | Mouse / A/D | Right Stick / Left Stick X |
-| Jump | Space | A (Bottom Face) |
-| Attack | Left Click | X (Right Face) |
-| Attack 2 | Right Click | Y (Left Face) |
-| Aim | Right Click Hold | Right Trigger |
-| Dodge | Left Shift | LB |
-| Use Item | E | RB |
-| Cycle Inventory | Q | D-Pad Left |
-| Open Map | M | D-Pad Up |
-| Pause/Menu | Escape | Start/Select |
-| Toggle Menu | F1 | D-Pad Right |
-| Quick Save | F5 | B |
-| Quick Load | F8 | A |
+  ```bash
+  PREFIX="$HOME/.steam/steam/steamapps/compatdata/3305630/pfx"
+  DEST="$PREFIX/drive_c/users/steamuser/AppData/Local/SwordTale/Saved/Config/WindowsNoEditor"
+  mkdir -p "$DEST"
+  cp Input.ini "$DEST/Input.ini"
+  ```
 
-## UE4 Input.ini
+- **Windows (PowerShell):**
 
-The `Input.ini` file contains Unreal Engine 4 input bindings that map both keyboard and gamepad inputs. UE4's built-in gamepad support handles the translation automatically when Steam Input is enabled.
+  ```powershell
+  $DEST = Join-Path $env:LOCALAPPDATA 'SwordTale\Saved\Config\WindowsNoEditor'
+  New-Item -ItemType Directory -Force -Path $DEST | Out-Null
+  Copy-Item .\Input.ini (Join-Path $DEST 'Input.ini')
+  ```
 
-## Compatibility
+- **Steam Deck:** run the Linux command in Desktop Mode's terminal (Konsole).
+  The `~/.steam` home directory is writable even when the SD card/read-only
+  root is not — this path is gated-mode safe.
 
-Tested with:
-- Steam Input (SteamOS / Linux / Windows)
-- Xbox controllers (native XInput)
-- PlayStation controllers (via DS4Windows or Steam Input)
-- Generic SDL2 gamepads
+### 3. Launch
+
+Start the game through Steam. Unreal reads `Input.ini` at startup and merges it
+over the pak's `DefaultInput.ini` — no other action needed.
+
+> **Back up first.** If you ever want the stock layout, delete or rename the
+> `Input.ini` you placed (the game ships its defaults inside the pak, so it
+> restores itself). Keep a copy of your own edits if you tweaked further.
+
+---
+
+## Method B: Steam Input (client-side, optional)
+
+The `Input.ini` above is authoritative for the engine. You can additionally
+tune deadzones/haptics in **Steam → Settings → Controller**, but do not remap
+primary actions there — let `Input.ini` own them to avoid double-binding.
+
+For controller **detection / calibration** in Steam:
+
+1. Steam → **Settings → Controller → General Controller Settings**
+2. Tick your controller types (Xbox / PlayStation / Switch Pro / Generic)
+3. **Steam → Settings → Controller → Test** (or the calibration UI on Deck)
+4. Deadzone: UE already applies `GamepadDeadZone=0.300000`; most pads need no
+   extra adjustment.
+
+**Steam Deck:** the built-in layout editor will show the game's *actions*
+(Attack, Block, Charge, Dodge, …) because they come from the engine bindings —
+you can pin extra shortcuts to them, but the trigger/slot layout above is already
+what the engine reads.
+
+---
+
+## Method C: device-level remap (last resort)
+
+If you cannot place a file (e.g. cloud-only play from a locked machine) and
+Steam Input fails to pick up the actions, remap at the device layer:
+
+- **Windows:** built-in Xbox Accessories app, or reWASD — swap triggers online:
+  RT→LT, LT→RT, Shoulders, flip D-pad and Select as in the layout table.
+- **Linux:** `steamos-input` / `xpadneo` or Steam Input's own per-game layout
+  (Controller → Edit Layout → map physical triggers to the actions).
+- **Steam Deck:** Edit Layout in the game's controller config.
+
+Note Method C only rearranges *buttons* — the engine still decides what each
+action does. For a layout identical to this repo, prefer Method A.
+
+---
 
 ## Troubleshooting
 
-If controller doesn't work:
-1. Verify Steam Input is enabled for this game in Steam properties
-2. Check that your controller is detected by Steam
-3. Ensure the Input.ini is in the correct Saved/Config path
-4. Try restarting the game after applying the config
+| Symptom | Fix |
+|---------|-----|
+| Controller does nothing | Enable the controller type in Steam **General Controller Settings**; check the pad registers in Steam's Test screen |
+| Old bindings still fire (e.g. RB also blocks) | Both lines (removal `-` and addition `+`) must be present in `Input.ini`; confirm the file is in `WindowsNoEditor` (not `LinuxNoEditor`/top-level Saved) and restart the game |
+| Layout works but triggers feel twitchy | Fine-tune `GamepadDeadZone` in `Input.ini` (already 0.30) |
+| Using Heroic/Lutris and Steam Input absent | Method A still works — it is engine-level, Steam-independent |
+| Custom tweaks vanish after an update | The game does not touch `Saved/Config`; re-copy only if you reset the prefix |
+| Can't reach the path (macOS/Whisky) | In Whisky, right-click the bottle → Open C: Drive, then follow `users/<user>/AppData/Local/SwordTale/Saved/Config/WindowsNoEditor` |
+
+---
+
+## Files
+
+- `Input.ini` — the engine-level remap (works on every OS/kernel).
+- `README.md` — this guide.
 
 ## License
 
-MIT
+MIT. This repo contains **no game files** — only configuration directives and
+documentation for Unreal Engine's public config system.
