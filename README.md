@@ -1,3 +1,4 @@
+<!-- Watermark: Living_Sin (intricos777-dot) + AI agents (Hermes, Lia, opencode) - collaborative work -->
 # Sword Tale: Lost Excalibur — Controller / Gamepad Support
 
 Controller remap for **Sword Tale: Lost Excalibur** (Steam App ID: **3305630**,
